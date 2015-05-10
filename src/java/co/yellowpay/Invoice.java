@@ -1,9 +1,12 @@
 package co.yellowpay;
 
+import co.yellowpay.sdk.YellowException;
 import co.yellowpay.sdk.YellowSDK;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -51,13 +54,19 @@ public class Invoice extends HttpServlet {
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         //create invoice
-        Map<String, Object> payload = new HashMap<>();
+        Map<String, String> payload = new HashMap<String, String>();
         payload.put("base_price", amount);
         payload.put("base_ccy", curreny);
-        payload.put("callback", "http://yourdomain.local/sdk/sample/ipn.php");
+        payload.put("callback", "https://yellow-demo-java.herokuapp.com/IPN");
         payload.put("type", type);
         
-        HashMap<String, String> result = yellowSDK.createInvoice(payload);
+        HashMap<String, String> result = new HashMap<String, String>();
+        try {
+            result = yellowSDK.createInvoice(payload);
+        } catch (YellowException ex) {
+            Logger.getLogger(Invoice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         if( result.containsKey("id") ){
             request.setAttribute("invoice_id", result.get("id"));
             request.setAttribute("invoice_url", result.get("url"));

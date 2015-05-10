@@ -1,8 +1,11 @@
 package co.yellowpay;
 
+import co.yellowpay.sdk.YellowException;
 import co.yellowpay.sdk.YellowSDK;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -33,7 +36,13 @@ public class Status extends HttpServlet {
         String apiSecret = Keys.API_SECRET;
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
-        HashMap<String, String> result = yellowSDK.checkInvoiceStatus(id);
+        HashMap<String, String> result = new HashMap<String, String>();
+        try {
+            result = yellowSDK.checkInvoiceStatus(id);
+        } catch (YellowException ex) {
+            Logger.getLogger(Status.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         if( result.containsKey("status") ){
             request.setAttribute("status", result.get("status"));
             request.getRequestDispatcher("status.jsp").forward(request, response);

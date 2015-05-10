@@ -1,12 +1,16 @@
 package co.yellowpay;
 
+import co.yellowpay.sdk.YellowException;
 import co.yellowpay.sdk.YellowSDK;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,19 +32,24 @@ public class IPN extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String apiKey = Keys.API_KEY;
         String apiSecret = Keys.API_SECRET;
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
-        String body = getStringBodyFromRequest(request.getInputStream());
+        String body = getBody(request);
         String url = request.getRequestURL().toString();
-        String signature = request.getHeader("HTTP_API_SIGN");
-        String nonce = request.getHeader("HTTP_API_NONCE");
+        String signature = request.getHeader("api-sign");
+        String nonce = request.getHeader("api-nonce");
         
-        boolean isValidIPN = yellowSDK.verifyIPN(url, signature, nonce, body);
+        boolean isValidIPN = false;
+        try {
+            isValidIPN = yellowSDK.verifyIPN(url, signature, nonce, body);
+        } catch (YellowException ex) {
+            Logger.getLogger(IPN.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         if( isValidIPN ){
             logToFIle("ipn", "is valid IPN call\n");
@@ -52,15 +61,38 @@ public class IPN extends HttpServlet {
         }
     }
     
-    // Converts a file to a string
-    private String getStringBodyFromRequest(ServletInputStream input) throws IOException {
-        int value;
-        StringBuilder body = new StringBuilder();
-        while ((value=input.read()) != -1) {
-          body.append(value);
+    // get body as string
+    public String getBody(HttpServletRequest request) throws IOException {
+        String body;
+        StringBuilder stringBuilder = new StringBuilder();
+        BufferedReader bufferedReader = null;
+
+        try {
+            InputStream inputStream = request.getInputStream();
+            if (inputStream != null) {
+                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                char[] charBuffer = new char[128];
+                int bytesRead;
+                while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                    stringBuilder.append(charBuffer, 0, bytesRead);
+                }
+            } else {
+                stringBuilder.append("");
+            }
+        } catch (IOException ex) {
+            throw ex;
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException ex) {
+                    throw ex;
+                }
+            }
         }
-        
-        return body.toString();
+
+        body = stringBuilder.toString();
+        return body;
     }
     
     // Logging to a file
