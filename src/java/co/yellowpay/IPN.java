@@ -52,17 +52,16 @@ public class IPN extends HttpServlet {
         }
         
         if( isValidIPN ){
-            logToFIle("ipn", "is valid IPN call\n");
-            response.setHeader(url, nonce);
+            logToFile("ipn", "is valid IPN call\n");
         }else{
-            logToFIle("ipn", "is invalid IPN call\n");
+            logToFile("ipn", "is invalid IPN call\n");
             /// invalid/ fake IPN , no need to do anything
             response.sendError(403, "Unauthorized");
         }
     }
     
     // get body as string
-    public String getBody(HttpServletRequest request) throws IOException {
+    public String getBody(HttpServletRequest request) {
         String body;
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
@@ -80,13 +79,11 @@ public class IPN extends HttpServlet {
                 stringBuilder.append("");
             }
         } catch (IOException ex) {
-            throw ex;
         } finally {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException ex) {
-                    throw ex;
                 }
             }
         }
@@ -96,7 +93,7 @@ public class IPN extends HttpServlet {
     }
     
     // Logging to a file
-    private void logToFIle(String loggerName, String textToLog) {
+    private void logToFile(String loggerName, String textToLog) {
         // Logging to a file
         Logger logger = Logger.getLogger(loggerName);  
         FileHandler fh;  

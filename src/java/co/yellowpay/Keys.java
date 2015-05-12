@@ -6,7 +6,7 @@ package co.yellowpay;
  */
 public class Keys {
     
-	public static final String API_KEY = "your public key";
-	public static final String API_SECRET = "your private key";
+	public static final String API_KEY = System.getenv("YELLOW_API_KEY");
+	public static final String API_SECRET = System.getenv("YELLOW_API_SECRET");
     
 }
