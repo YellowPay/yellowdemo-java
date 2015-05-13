@@ -49,8 +49,8 @@ public class Invoice extends HttpServlet {
         String amount = request.getParameter("amount");
         String type = request.getParameter("type");
         
-        String apiKey = Keys.API_KEY;
-        String apiSecret = Keys.API_SECRET;
+        String apiKey = Config.API_KEY;
+        String apiSecret = Config.API_SECRET;
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         //create invoice

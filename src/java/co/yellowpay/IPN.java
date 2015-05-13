@@ -35,12 +35,12 @@ public class IPN extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String apiKey = Keys.API_KEY;
-        String apiSecret = Keys.API_SECRET;
+        String apiKey = Config.API_KEY;
+        String apiSecret = Config.API_SECRET;
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         String body = getBody(request);
-        String url = request.getRequestURL().toString();
+        String url = Config.IPN_URL;
         String signature = request.getHeader("api-sign");
         String nonce = request.getHeader("api-nonce");
         
@@ -61,31 +61,24 @@ public class IPN extends HttpServlet {
     }
     
     // get body as string
-    public String getBody(HttpServletRequest request) {
+    public String getBody(HttpServletRequest request) throws IOException{
         String body;
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
 
-        try {
-            InputStream inputStream = request.getInputStream();
-            if (inputStream != null) {
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                char[] charBuffer = new char[128];
-                int bytesRead;
-                while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                    stringBuilder.append(charBuffer, 0, bytesRead);
-                }
-            } else {
-                stringBuilder.append("");
+        InputStream inputStream = request.getInputStream();
+        if (inputStream != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            char[] charBuffer = new char[128];
+            int bytesRead;
+            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                stringBuilder.append(charBuffer, 0, bytesRead);
             }
-        } catch (IOException ex) {
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException ex) {
-                }
-            }
+        } else {
+            stringBuilder.append("");
+        }
+        if (bufferedReader != null) {
+            bufferedReader.close();
         }
 
         body = stringBuilder.toString();
@@ -93,22 +86,19 @@ public class IPN extends HttpServlet {
     }
     
     // Logging to a file
-    private void logToFile(String loggerName, String textToLog) {
+    private void logToFile(String loggerName, String textToLog) throws IOException {
         // Logging to a file
         Logger logger = Logger.getLogger(loggerName);  
         FileHandler fh;  
 
-        try {  
-            // This block configure the logger with handler and formatter  
-            fh = new FileHandler(loggerName+".log");  
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();  
-            fh.setFormatter(formatter);  
+        // This block configure the logger with handler and formatter  
+        fh = new FileHandler(loggerName+".log");  
+        logger.addHandler(fh);
+        SimpleFormatter formatter = new SimpleFormatter();  
+        fh.setFormatter(formatter);  
 
-            // the following statement is used to log any messages  
-            logger.info(textToLog);  
-        } catch (SecurityException | IOException e) {  
-        }  
+        // the following statement is used to log any messages  
+        logger.info(textToLog);  
     }
 
 }

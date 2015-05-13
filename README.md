@@ -13,7 +13,7 @@ This is a simple JAVA 'SERVLETS' site with three pages:
 
 *status.jsp* contains sample code to monitor a callback url ("IPN" Instant Payment Notification) for changes to the invoice status
 
-*Keys.java* contains the apiKey & apiSecret
+*Config.java* contains all the common variables (apiKey, apiSecret & IPN url)
 
 This demo server doesn't take any action when the invoice status changes - a real shopping cart integration would likely update an order management system and redirect customers to an order confirmation page.
 

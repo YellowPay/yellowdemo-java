@@ -32,8 +32,8 @@ public class Status extends HttpServlet {
             throws ServletException, IOException {
         String id = request.getParameter("id");
 
-        String apiKey = Keys.API_KEY;
-        String apiSecret = Keys.API_SECRET;
+        String apiKey = Config.API_KEY;
+        String apiSecret = Config.API_SECRET;
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         HashMap<String, String> result = new HashMap<String, String>();
